@@ -1,21 +1,34 @@
 package org.mattpayne.fun.jpa.cucumber.simplejpa;
 
+import static org.junit.Assert.*;
+
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import java.sql.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mattpayne.fun.jpa.cucumber.simplejpa.models.Meeting;
 import org.mattpayne.fun.jpa.cucumber.simplejpa.models.Person;
 import org.mattpayne.fun.jpa.cucumber.simplejpa.repositories.MeetingRepository;
 import org.mattpayne.fun.jpa.cucumber.simplejpa.repositories.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ContextConfiguration;
 
-@SpringBootApplication
-public class SimpleJpaApplication implements CommandLineRunner {
+// https://blog.arnoldgalovics.com/lazyinitializationexception-demystified/
+
+import static org.hibernate.Hibernate.isInitialized;
+import static org.junit.Assert.*;
+
+// https://reflectoring.io/spring-boot-data-jpa-test/
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@DataJpaTest
+public class DataAccessTest {
 	
 	@Autowired
 	private PersonRepository personRepository;
@@ -23,13 +36,9 @@ public class SimpleJpaApplication implements CommandLineRunner {
 	@Autowired
 	private MeetingRepository meetingRepository;
 
-	
-	public static void main(String[] args) {
-		SpringApplication.run(SimpleJpaApplication.class, args);
-	}
-	
-	@Override
-	public void run(String... args) throws Exception {
+
+	@Test
+	public void test() {
 		Person matt = new Person();
 		matt.setName("Matt Payne");
 		matt.setEmail("Matt@MattPayne.org");
@@ -50,9 +59,10 @@ public class SimpleJpaApplication implements CommandLineRunner {
 		Optional<Person> alsoMatt = personRepository.findById(matt.getId());
 		boolean p = alsoMatt.isPresent();
 		Person matt2 = alsoMatt.get();
- 		int numMeetings = matt2.getMeetings().size();
-		System.out.println("\n\n"+numMeetings+"\n\n");
+		// assertFalse(isInitialized(matt2.getMeetings()));
+		// WHY DOES this get initialized here???
+		int numMeetings = matt2.getMeetings().size();
+		System.out.println(numMeetings);
 	}
-
 
 }
