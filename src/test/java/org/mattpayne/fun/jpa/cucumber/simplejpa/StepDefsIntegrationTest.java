@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import cucumber.api.java.en.And;
@@ -46,6 +47,7 @@ public class StepDefsIntegrationTest extends SpringIntegrationTest {
 		Meeting meeting = new Meeting();
 		meeting.setName(meetingName);
 		meetingRepository.save(meeting);
+		person = personRepository.findById(person.getId()).get();
 		Set<Meeting> meetings = this.person.getMeetings();
 		if (meetings == null)
 			meetings = new HashSet<>();
@@ -55,10 +57,15 @@ public class StepDefsIntegrationTest extends SpringIntegrationTest {
 
 	@Then("person has {int} meetings")
 	public void person_has_meetings(Integer n) {
-//		assertThat(person.getMeetings().size(), is(n));
+		//	assertThat(person.getMeetings().size(), is(n));
 		Set<Meeting> meetings = person.getMeetings();
-		assertThat(meetings, is(not(null))); // WHY DOES THIS NPE?
-//		assertThat(meetings.size(), is(n));
+		// Do I really need to read it from the database again??
+		Optional<Person> p = personRepository.findById(person.getId());
+		Person alsoPerson = p.get();
+		meetings = alsoPerson.getMeetings();
+		System.out.println("\n\n\n\n");
+		System.out.println(meetings);
+		assertThat(meetings.size(), is(n));
 	}
 
 }
